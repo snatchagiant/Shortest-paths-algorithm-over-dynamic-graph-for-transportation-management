@@ -1,6 +1,6 @@
 # Introduce
 
-This source code is encoded by C++ and, implemented in console platform. This solution employs the CBST as priority heap to execute the best-first-search strategy. That conducts our algorithm able to transact mega data in more high efficiency than other guys and, becomes a truly linear program to solve this problem. 
+This source code is encoded by C++ and, implemented in console platform. It is for the experimental simulation of fastest path problem on dynamic graph.  
 
 # Arguments Setting
 
