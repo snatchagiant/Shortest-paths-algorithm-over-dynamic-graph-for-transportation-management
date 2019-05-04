@@ -120,27 +120,39 @@ INT64 graph_instance::T_computingPairs(int *status_list, INT64 *counter_list, in
 
 float graph_instance::T_calculateAverageLane()
 {//T_calculateAverageLane
-    int index = 0, sum = 0, average_lane = Lane_Length_list[0] >> 1; average_lane = Lane_Length_list[average_lane];
+    int index = 0, sum = 0, average_lane = Lane_Length_list[0] >> 1;
+    average_lane = Lane_Length_list[average_lane]; //get the mean member of length list
 
     if(average_lane <= 0) return -1;
+// read through Choosing_Length_list for all lengthes
     for(int leaf = 1; leaf <= nodes; leaf ++){
         if(Choosing_Length_list[leaf]){
             sum = sum + Choosing_Length_list[leaf] - average_lane; index ++;
         }
     }
     if(!sum) return average_lane;
-    return (float) sum /index + average_lane;
+    return (float) sum /index + average_lane; // calculate the average value
 }//T_calculateAverageLane
 
 float graph_instance::T_calculateAverageTime(CBST *cbst)
 {//T_calculateAverageTime
     INT64 sum = 0,
-    gauge = Lane_Length_list[0] + 1; gauge = gauge >> 1;
-    gauge = Lane_Length_list[gauge]; if(gauge <= 0) return -1;
+    gauge = Lane_Length_list[0] + 1; gauge = gauge >> 1; // get the mean of position
+    gauge = Lane_Length_list[gauge]; if(gauge <= 0) return -1; // get the average length of link
 
-    int index = Velocity_grade >> 1; index = get_Velocity(sampling_scope, Velocity_grade); if(index <= 0) return -2;
-
+// get the average velocity
+    int index = Velocity_grade >> 1;
+    index = get_Velocity(sampling_time_gap, index);
+    if(index < 0){
+        if(index < -1)
+            cout<<"\n the setting of velocity_grade is error for function get_Velocity"<<endl;
+        else
+            cout<<"\n the setting of sampling_time_interval you slected is error for function get_Velocity"<<endl;
+        return index;
+    }
     gauge = gauge / index; index = 0;
+
+// read through the arrival time table and parent list for the through time.
     for(int leaf = 1; leaf <= nodes; leaf ++){
         int root = parent_list[leaf];
         if(root > 0){
@@ -149,13 +161,6 @@ float graph_instance::T_calculateAverageTime(CBST *cbst)
         }
     }
     if(index <= 0) return 0;
-    if(!sum) return (float)gauge;
+    if(!sum) return (float)gauge;// calculate the average value.
     return ((float) sum / index) + gauge;
 }//T_calculateAverageTime
-
-
-
-
-
-
-
