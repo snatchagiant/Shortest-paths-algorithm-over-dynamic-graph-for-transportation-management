@@ -11,19 +11,19 @@ int graph_instance::T_OptimizingAnEndpoint(int *Origins_list, int Endpoint, CBST
             cout<<"\n leaf error in function T_OptimizingAnEndpoint";
             return -1;
         }
+        else if(cbst->get_TheKey(leaf) <= cbst->get_TheKey(Endpoint)) continue;
 
-        int orcale_time = cbst->get_TheKey(Endpoint); int lane = get_LanebySubgraph(Endpoint, pos); if(lane < 0) return -2;// get the parameter for orcale
+        int oracle_time = cbst->get_TheKey(Endpoint);
+        int lane = get_LanebySubgraph(Endpoint, pos); if(lane < 0) return -2;// get the parameter for orcale
 
-        // note that here we alter the departure time by the sum of indeed departure time and length of link
-        // in function calculateTravelALink is purely to add more different variants for our experiment.
-        orcale_time = calculateTravelALink(orcale_time, lane, &T_info);
+        oracle_time = calculateTravelALink(oracle_time, lane, &T_info);
 
-        if(orcale_time < 0) return -3;// computing error
-        else if(!orcale_time) continue; //the link has been interrupted
+        if(oracle_time < 0) return -3;// computing error
+        else if(!oracle_time) continue; //the link has been interrupted
 
         cord->QueryTimes = T_info.QueryTimes + cord->QueryTimes; cord->SubQueryTime = T_info.SubQueryTime + cord->SubQueryTime;
 
-        if(cbst->get_TheKey(leaf) <= orcale_time) continue;
+        if(cbst->get_TheKey(leaf) <= oracle_time) continue;
 
          //2.1 if this arc is sa, delete leaf off CBST if resides in CBST
         Info_collection info; string str = "\n deletion, function ContestMethod";
@@ -35,7 +35,7 @@ int graph_instance::T_OptimizingAnEndpoint(int *Origins_list, int Endpoint, CBST
         }catch(Exception_about_memory &e){e.what(); throw e;}
 
         // 2.2 update the total weight and parent-child relation
-        cbst->set_TheKey(leaf, orcale_time); parent_list[leaf] = Endpoint; Choosing_Length_list[leaf] = lane;
+        cbst->set_TheKey(leaf, oracle_time); parent_list[leaf] = Endpoint; Choosing_Length_list[leaf] = lane;
 
         // 2.3 backup the new origins
         if(cbst->get_info(leaf, Auxiliary) < 1){//backup, if leaf being clean
@@ -84,4 +84,3 @@ int graph_instance::T_ContestMethodCL(int *Origins_list, int Agency_of_CL, CBST 
 
     return num_cousin;
 }//T_ContestMethodCL
-
