@@ -130,5 +130,3 @@ bool graph_instance::initialize_anNetWork(int x, int y, int tts, int Vg, int gap
 
         return initializing_instaces;
 }//initialize_anNetWork
-
-
