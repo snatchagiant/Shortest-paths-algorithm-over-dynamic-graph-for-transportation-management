@@ -1,5 +1,3 @@
-#include "Graph_Instance.h"
-
 int graph_instance::T_DoHybirdDijkstraMethod(CBST *cbst, int *origins_list, int *regions, int *state_list, int source, Info_collection *info, Traffic_info *cord)
 {//T_DoHybirdDijkstraMethod
 
@@ -26,30 +24,37 @@ int graph_instance::T_DoHybirdDijkstraMethod(CBST *cbst, int *origins_list, int 
 
                 if(leaf <= 0 || leaf > nodes) return -4; // there is error in data structure of leaf set
 
-                int orcale_time = cbst->get_TheKey(root); int Link_length = get_LanebySubgraph(root, k); if(Link_length < 0) return -2;// get the parameter for orcale
-
-                orcale_time = calculateTravelALink(orcale_time, Link_length, &T_info);
-
-                if(orcale_time < 0) return -5;// calculation error
-                else if(!orcale_time) continue; // this link has been interrupted in reality
-
                 info->Accounter ++; counter_1 = T_info.QueryTimes + counter_1; counter_2 = T_info.SubQueryTime + counter_2;
 
-                bool flag = false;
+                int flag = -1;
                 if(state_list[leaf] <= 0){//A. partition nodes into next region, label it no labeled
                     state_list[leaf] = index + 1;
                     amount ++; address = offset + amount; regions[address] = leaf; //push the node into region.
-                    flag = true;
+                    flag = 1; //enable to label
                 }//A
-                else if(state_list[leaf] > state_list[root] && cbst->get_TheKey(leaf) > orcale_time) flag = true;//B. only just correct such node that in next region
-                else if(cbst->get_TheKey(leaf) > orcale_time && signal){
-                    // leaf in previous or native region, no correcting but record it as being candiate for next stage CA
-                    if(push_ANodeIntoAList(root, origins_list, nodes) <= 0) return -6;
-                    signal = false; // label root has been recorded
-                }
+                else{//B. address the case if node been partitined and in next, previous or native region
 
-                if(flag){//label leaf
-                    cbst->set_TheKey(leaf, orcale_time); parent_list[leaf] = root; // label total times
+                    if(state_list[leaf] > state_list[root]) flag = 0;
+                    else if(signal){ //in previous or native region
+                        if(cbst->get_TheKey(leaf) > cbst->get_TheKey(root)){
+                            // the behind less than previous, possible as origin
+                            if(push_ANodeIntoAList(root, origins_list, nodes) <= 0) return -6;
+                            signal = false; // label root has been recorded
+                        }
+                    }
+                }
+                 int oracle_time = 0; int Link_length = 0;
+                if(flag >= 0){//labeling or correcting
+                    //get the oracle
+                    oracle_time = cbst->get_TheKey(root); Link_length = get_LanebySubgraph(root, k); if(Link_length < 0) return -2;// get the parameter for orcale
+                    oracle_time = calculateTravelALink(oracle_time, Link_length, &T_info);
+
+                    if(oracle_time < 0) return -5;// calculation error
+                    else if(!oracle_time) continue; // this link has been interrupted in reality
+
+                    if(!flag && cbst->get_TheKey(leaf) <= oracle_time) continue; // no necessary to correct
+
+                    cbst->set_TheKey(leaf, oracle_time); parent_list[leaf] = root; // label or correct target.
                     Choosing_Length_list[leaf] = Link_length;
                 }
             }//leaf set
