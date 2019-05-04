@@ -58,6 +58,3 @@ bool graph_instance::wad_CostListWithWeight(int root, int pos, int weight)
     weight_list[root][pos] = weight;
     return true;
 }//wad_CostListWithWeight
-
-
-
